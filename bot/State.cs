@@ -39,6 +39,9 @@ namespace bot
             executingPlayer.Inventory.Apply(order.Delta);
             executingPlayer.Score += order.Price;
         }
+
+        public override string ToString() => 
+            $"State{{Me={Me},\n Enemy={Enemy},\n Actions={string.Join('\n', Actions.Select(a => a.ToString()))}}}";
     }
 
     public class Player
@@ -51,16 +54,22 @@ namespace bot
             Inventory = inventory;
             Score = score;
         }
+
+        public override string ToString() => $"Player{{Inventory={Inventory}, Score={Score}}}";
     }
 
-    public record GameAction(int Id, 
-        GameActionType Type, 
-        IngredientsVolume Delta, 
-        int Price, 
-        int TomeIndex = 0, 
-        int TaxCount = 0, 
-        bool Castable = false, 
-        bool Repeatable = false);
+    public record GameAction(int Id,
+        GameActionType Type,
+        IngredientsVolume Delta,
+        int Price,
+        int TomeIndex = 0,
+        int TaxCount = 0,
+        bool Castable = false,
+        bool Repeatable = false)
+    {
+        public override string ToString() => 
+            $"Action{{Type={Type}, Delta={Delta}, Price={Price}}}";
+    };
 
     public enum GameActionType
     {
@@ -101,5 +110,8 @@ namespace bot
                    SecondIngredient >= delta.SecondIngredient &&
                    ThirdIngredient >= delta.ThirdIngredient;
         }
+
+        public override string ToString() => 
+            $"Ingredients[{ZeroIngredient}, {FirstIngredient}, {SecondIngredient}, {ThirdIngredient}]";
     }
 }

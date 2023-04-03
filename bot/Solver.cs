@@ -1,10 +1,21 @@
-﻿namespace bot
+﻿using System.Linq;
+
+namespace bot
 {
     public class Solver
     {
         public BotCommand GetCommand(State state, Countdown countdown)
         {
-            return new Wait { Message = "Nothing to do..." };
+            var mostExpensivePossibleOrder = state.Actions
+                .Where(ga => ga.Type == GameActionType.Brew)
+                .Where(ga => state.Me.Inventory.IsPossibleToApply(ga.Delta))
+                .OrderByDescending(ga => ga.Price)
+                .FirstOrDefault();
+
+            if (mostExpensivePossibleOrder == null)
+                return new Wait();
+
+            return new Brew(mostExpensivePossibleOrder.Id);
         }
     }
-}   
+}
