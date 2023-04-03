@@ -1,4 +1,7 @@
-﻿namespace bot;
+﻿using System;
+using System.Linq;
+
+namespace bot;
 
 public class State
 {
@@ -12,12 +15,36 @@ public class State
         Enemy = enemy;
         Actions = actions;
     }
+
+    public void MyExecute(BotCommand command) => Execute(command, Me);
+    public void EnemyExecute(BotCommand command) => Execute(command, Enemy);
+
+    private void Execute(BotCommand command, Player executingPlayer)
+    {
+        if (command.GetType() == typeof(Brew)) ExecuteBrew((Brew)command, executingPlayer);
+
+        if (command.GetType() == typeof(Wait)) return;
+    }
+
+    private void ExecuteBrew(Brew command, Player executingPlayer)
+    {
+        var brewCommand = command;
+        var order = Actions.Single(ga => ga.Id == brewCommand.OrderId);
+        if (order.Type != GameActionType.Brew)
+            throw new InvalidOperationException("Can't brew not BREW type action");
+
+        if (!executingPlayer.Inventory.IsPossibleToApply(order.Delta))
+            throw new InvalidOperationException("Not enough ingredients for BREW this order");
+
+        executingPlayer.Inventory.Apply(order.Delta);
+        executingPlayer.Score += order.Price;
+    }
 }
 
 public class Player
 {
     public readonly IngredientsVolume Inventory; // ingredient counts
-    public readonly int Score;
+    public int Score;
 
     public Player(IngredientsVolume inventory, int score)
     {
@@ -26,37 +53,14 @@ public class Player
     }
 }
 
-public class GameAction
-{
-    public readonly int Id; // the unique ID of this spell or recipe
-    public readonly GameActionType Type; // in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
-    public readonly IngredientsVolume Delta; // ingredients changes
-    public readonly int Price; // the price in rupees if this is a potion
-    public readonly int TomeIndex; // in the first two leagues: always 0; later: the index in the tome if this is a tome spell, equal to the read-ahead tax; For brews, this is the value of the current urgency bonus
-    public readonly int TaxCount; // in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell; For brews, this is how many times you can still gain an urgency bonus
-    public readonly bool Castable; // in the first league: always 0; later: 1 if this is a castable player spell
-    public readonly bool Repeatable; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
-
-    public GameAction(
-        int id, 
-        GameActionType type, 
-        IngredientsVolume delta, 
-        int price, 
-        int tomeIndex = 0, 
-        int taxCount = 0, 
-        bool castable = false, 
-        bool repeatable = false)
-    {
-        Id = id;
-        Type = type;
-        Delta = delta;
-        Price = price;
-        TomeIndex = tomeIndex;
-        TaxCount = taxCount;
-        Castable = castable;
-        Repeatable = repeatable;
-    }
-}
+public record GameAction(int Id, 
+    GameActionType Type, 
+    IngredientsVolume Delta, 
+    int Price, 
+    int TomeIndex = 0, 
+    int TaxCount = 0, 
+    bool Castable = false, 
+    bool Repeatable = false);
 
 public enum GameActionType
 {
@@ -88,5 +92,13 @@ public class IngredientsVolume
         FirstIngredient += delta.FirstIngredient;
         SecondIngredient += delta.SecondIngredient;
         ThirdIngredient += delta.ThirdIngredient;
+    }
+
+    public bool IsPossibleToApply(IngredientsVolume delta)
+    {
+        return ZeroIngredient >= delta.ZeroIngredient &&
+        FirstIngredient >= delta.FirstIngredient &&
+        SecondIngredient >= delta.SecondIngredient &&
+        ThirdIngredient >= delta.ThirdIngredient;
     }
 }

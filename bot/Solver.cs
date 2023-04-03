@@ -4,7 +4,7 @@
     {
         public BotCommand GetCommand(State state, Countdown countdown)
         {
-            return new Move(V.Zero) { Message = "Nothing to do..." };
+            return new Wait { Message = "Nothing to do..." };
         }
     }
 }   
