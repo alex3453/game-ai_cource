@@ -105,10 +105,10 @@ namespace bot
 
         public bool IsPossibleToApply(IngredientsVolume delta)
         {
-            return ZeroIngredient >= delta.ZeroIngredient &&
-                   FirstIngredient >= delta.FirstIngredient &&
-                   SecondIngredient >= delta.SecondIngredient &&
-                   ThirdIngredient >= delta.ThirdIngredient;
+            return ZeroIngredient + delta.ZeroIngredient >= 0&&
+                   FirstIngredient + delta.FirstIngredient >= 0 &&
+                   SecondIngredient + delta.SecondIngredient >= 0 &&
+                   ThirdIngredient + delta.ThirdIngredient >= 0;
         }
 
         public override string ToString() => 
