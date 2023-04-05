@@ -1,4 +1,5 @@
 ﻿namespace bot
 {
-    public record Move(V Destination) : BotCommand;
+    public record Brew(int OrderId) : BotCommand;
+    public record Wait : BotCommand;
 }

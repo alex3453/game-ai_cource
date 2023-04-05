@@ -10,12 +10,11 @@ namespace bot
         {
             var reader = new ConsoleReader();
             var solver = new Solver();
-            var init = reader.ReadInit();
             reader.FlushToStdErr();
             var first = true;
             while (true)
             {
-                var state = reader.ReadState(init);
+                var state = reader.ReadState();
                 var timer = new Countdown(first ? 500 : 50); //TODO fix timeouts
                 reader.FlushToStdErr();
                 var command = solver.GetCommand(state, timer);

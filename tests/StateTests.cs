@@ -17,10 +17,10 @@ namespace bot
          * вставить в этот тест, и тем самым повторить проблему в контролируемых условиях.
          * Дальше можно отлаживать проблему привычными способами в IDE.     
          */
-        [TestCase("Some|init|data", "Some input|copy pasted from|error stream")]
-        public void Solve(string initInput, string stepInput)
+        [TestCase("5|42 BREW -1 -1 0 0 6 0 0 0 0|72 BREW 0 -1 -1 -1 19 0 0 0 0|68 BREW 0 0 -1 0 12 0 0 0 0|57 BREW 0 0 -1 -1 14 0 0 0 0|61 BREW 0 0 0 -2 16 0 0 0 0|2 2 3 3 0|2 2 3 3 0")]
+        public void Solve(string stepInput)
         {
-            var reader = new ConsoleReader(initInput + "|" + stepInput);
+            var reader = new ConsoleReader(stepInput);
             var state = reader.ReadState();
             Console.WriteLine(state);
 
