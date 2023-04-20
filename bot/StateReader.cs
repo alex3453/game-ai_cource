@@ -1,28 +1,52 @@
-﻿namespace bot
+﻿using System;
+using System.Collections.Generic;
+
+namespace bot
 {
     public static class StateReader
     {
         public static State ReadState(this ConsoleReader console)
         {
-            var actionCount = int.Parse(console.ReadLine()); // the number of spells and recipes in play
-            var actions = new GameAction[actionCount];
-        
+            var orders = new List<Order>();
+            var myCasts = new List<Cast>();
+            var enemyCasts = new List<Cast>();
+            
+            var actionCount = int.Parse(console.ReadLine());
             for (int i = 0; i < actionCount; i++)
             {
                 var inputs = console.ReadLine().Split(' ');
-                actions[i] = ReadGameAction(inputs);
+                var action = ReadGameAction(inputs);
+                switch (action.Type)
+                {
+                    case "BREW":
+                        orders.Add(ParseOrder(action));
+                        break;
+                    case "CAST":
+                        myCasts.Add(ParseCast(action));
+                        break;
+                    case "OPPONENT_CAST":
+                        enemyCasts.Add(ParseCast(action));
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unknown action type {action.Type}");
+                }
             }
         
             var myInputs = console.ReadLine().Split(' ');
-            var me = ReadPlayer(myInputs);
+            var me = ReadPlayer(myInputs, myCasts);
         
             var enemyInputs = console.ReadLine().Split(' ');
-            var enemy = ReadPlayer(enemyInputs);
+            var enemy = ReadPlayer(enemyInputs, enemyCasts);
         
-            return new State(me, enemy, actions);
+            return new State(me, enemy, orders);
         }
 
-        private static Player ReadPlayer(string[] inputs)
+        private static Cast ParseCast(GameAction action) =>
+            new(action.Id, action.Delta, action.Castable);
+
+        private static Order ParseOrder(GameAction action) => new(action.Id, action.Delta, action.Price);
+
+        private static Player ReadPlayer(string[] inputs, List<Cast> casts)
         {
             var inv0 = int.Parse(inputs[0]);
             var inv1 = int.Parse(inputs[1]);
@@ -30,38 +54,39 @@
             var inv3 = int.Parse(inputs[3]);
             var inventory = new IngredientsVolume(inv0, inv1, inv2, inv3);
 
-            var score = int.Parse(inputs[4]); // amount of rupees
+            var score = int.Parse(inputs[4]);
 
-            return new Player(inventory, score);
+            return new Player(inventory, casts, score);
         }
 
         private static GameAction ReadGameAction(string[] inputs)
         {
             var actionId = int.Parse(inputs[0]); // the unique ID of this spell or recipe
 
-            var actionTypeStr = inputs[1];
-            var actionType = actionTypeStr == "BREW" ? GameActionType.Brew 
-                : GameActionType.Brew; // in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
+            var actionType = inputs[1];
 
             var delta0 = int.Parse(inputs[2]); // tier-0 ingredient change
             var delta1 = int.Parse(inputs[3]); // tier-1 ingredient change
             var delta2 = int.Parse(inputs[4]); // tier-2 ingredient change
             var delta3 = int.Parse(inputs[5]); // tier-3 ingredient change
             var delta = new IngredientsVolume(delta0, delta1, delta2, delta3);
-
-            var price = int.Parse(inputs[6]); // the price in rupees if this is a potion
-
-            var
-                tomeIndex = int.Parse(
-                    inputs[7]); // in the first two leagues: always 0; later: the index in the tome if this is a tome spell, equal to the read-ahead tax; For brews, this is the value of the current urgency bonus
-            var
-                taxCount = int.Parse(
-                    inputs[8]); // in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell; For brews, this is how many times you can still gain an urgency bonus
-            var castable = inputs[9] != "0"; // in the first league: always 0; later: 1 if this is a castable player spell
-            var repeatable =
-                inputs[10] != "0"; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
+            
+            var price = int.Parse(inputs[6]);
+            var tomeIndex = int.Parse(inputs[7]);
+            var taxCount = int.Parse(inputs[8]);
+            var castable = inputs[9] != "0";
+            var repeatable = inputs[10] != "0";
 
             return new GameAction(actionId, actionType, delta, price, tomeIndex, taxCount, castable, repeatable);
         }
     }
+
+    public record GameAction(int Id,
+        string Type,
+        IngredientsVolume Delta,
+        int Price,
+        int TomeIndex,
+        int TaxCount,
+        bool Castable,
+        bool Repeatable);
 }

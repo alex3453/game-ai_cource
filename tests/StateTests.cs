@@ -17,7 +17,7 @@ namespace bot
          * вставить в этот тест, и тем самым повторить проблему в контролируемых условиях.
          * Дальше можно отлаживать проблему привычными способами в IDE.     
          */
-        [TestCase("5|42 BREW -1 -1 0 0 6 0 0 0 0|72 BREW 0 -1 -1 -1 19 0 0 0 0|68 BREW 0 0 -1 0 12 0 0 0 0|57 BREW 0 0 -1 -1 14 0 0 0 0|61 BREW 0 0 0 -2 16 0 0 0 0|2 2 3 3 0|2 2 3 3 0")]
+        [TestCase("13|46 BREW -2 -3 0 0 8 0 0 0 0|64 BREW 0 0 -2 -3 18 0 0 0 0|43 BREW -3 -2 0 0 7 0 0 0 0|59 BREW -2 0 0 -3 14 0 0 0 0|61 BREW 0 0 0 -4 16 0 0 0 0|78 CAST 2 0 0 0 0 -1 -1 0 0|79 CAST -1 1 0 0 0 -1 -1 1 0|80 CAST 0 -1 1 0 0 -1 -1 1 0|81 CAST 0 0 -1 1 0 -1 -1 1 0|82 OPPONENT_CAST 2 0 0 0 0 -1 -1 0 0|83 OPPONENT_CAST -1 1 0 0 0 -1 -1 1 0|84 OPPONENT_CAST 0 -1 1 0 0 -1 -1 1 0|85 OPPONENT_CAST 0 0 -1 1 0 -1 -1 1 0|5 0 0 0 0|5 0 0 0 0")]
         public void Solve(string stepInput)
         {
             var reader = new ConsoleReader(stepInput);
